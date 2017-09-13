@@ -1,0 +1,11 @@
+DistelliAccessToken: '<%= $distelli::agent::access_token %>'
+DistelliSecretKey: '<%= $distelli::agent::secret_key %>'
+<%  if $distelli::agent::endpoint { -%>
+  AgentEndpoint: '<%= $distelli::agent::endpoint %>'
+<%  }
+    if $distelli::agent::environments and $distelli::agent::environments.size > 0 { -%>
+    Environments:
+<%      $distelli::agent::environments.each |$env| { -%>
+      - <%= $env %>
+<%      }
+    } %>
