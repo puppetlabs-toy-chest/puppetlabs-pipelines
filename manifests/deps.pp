@@ -1,5 +1,5 @@
 class distelli::deps (
-  String $distelli_user_home  = '/home/distelli/',
+  String $distelli_user_home  = '/home/distelli',
   String $distelli_user_shell = '/bin/bash',
 ){
   include '::archive'
