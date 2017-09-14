@@ -53,7 +53,7 @@ class distelli::agent (
     exec { $client_installer :
       command => "${client_installer} agent install",
       require => File[$config_file],
-      # creates => ,
+      creates => '/distelli',
     }
   }
   else {
