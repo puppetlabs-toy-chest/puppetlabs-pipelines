@@ -2,7 +2,7 @@ class distelli::deps (
   String $distelli_user_password       = 'changeme',
   String $distelli_user_shell          = '/bin/bash',
   Boolean $install_chocolatey          = false,
-  Optional[String] $distelli_user_home = undef,
+  Optional[String] $distelli_user_home = $distelli::agent::distelli_user_home,
 ){
   if $::facts['os']['family'] == 'windows' {
     if $install_chocolatey {

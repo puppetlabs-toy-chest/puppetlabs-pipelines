@@ -1,10 +1,11 @@
 class distelli::agent (
   Sensitive $access_token,
   Sensitive $secret_key,
-  Boolean   $install_chocolatey = false,
-  Optional[String]        $endpoint     = undef,
-  Optional[String]        $version      = undef,
-  Optional[Array[String]] $environments = undef,
+  Boolean                 $install_chocolatey = false,
+  Optional[String]        $endpoint           = undef,
+  Optional[String]        $version            = undef,
+  Optional[String]        $distelli_user_home = undef,
+  Optional[Array[String]] $environments       = undef,
 ){
 
   if $::facts['os']['family'] == 'windows' {

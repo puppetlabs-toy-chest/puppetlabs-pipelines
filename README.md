@@ -23,7 +23,19 @@ All parameters for the Distelli module are contained within the main `::distelli
 
 ### Beginning with Distelli Agent
 
+### Credential Requirements
+
 In order to get up and running you must at minimum supply the Distelli Access Token and Distelli Secret Key respectively
+
+You will likely want to involve Hiera with some form of encryption enabled to pass in these sensitive items to ensure your credentials are safeguarded.
+
+### Installation requirements
+
+Since 7zip is required to allow the [Archive](https://forge.puppet.com/puppet/archive) module to extract the Distelli executable.  On \*nix platforms, this module will automatically use the package management system associated with your OS distribution (i.e., YUM and RedHat family).  On Windows, there is not an official package management system.  Therefore you have two options:
+- Install 7zip tool by some other means
+- Allow this module to install Chocolatey, a Windows package management system, to install 7zip
+
+### Install, configure, and run on OS with inherent package management system
 
 ```puppet
 class { '::distelli::agent':
@@ -32,15 +44,7 @@ class { '::distelli::agent':
 }
 ```
 
-You will likely want to involve Hiera with some form of encryption enabled to pass in these sensitive items to ensure your credentials are safeguarded.
-
-### Dependencies
-
-Since 7zip is required to allow the [Archive](https://forge.puppet.com/puppet/archive) module to extract the Distelli executable.  On \*nix platforms, this module will automatically use the package management system associated with your OS distribution (i.e., YUM and RedHat family).  On Windows, there is not an official package management system.  Thefore you have two options:
-- Install 7zip tool by some other means
-- Allow this module to install Chocolatey, a Windows package management system, to install 7zip
-
-To get Chocolatey to install 7zip prior to invoking this module:
+### Install, configure, and run on Windows without 7zip currently installed:
 
 ```puppet
 class { '::distelli::agent':
@@ -77,6 +81,16 @@ class { '::distelli::agent':
   access_token => 'super_long_access_token',
   secret_key   => 'super_secret_key',
   version      => '3.66.33',
+}
+```
+
+### Specify home directory for Distelli user
+
+```puppet
+class { '::distelli::agent':
+  access_token       => 'super_long_access_token',
+  secret_key         => 'super_secret_key',
+  distelli_user_home => '/opt/distelli',
 }
 ```
 
