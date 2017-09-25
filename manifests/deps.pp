@@ -1,7 +1,35 @@
 class distelli::deps (
-  String $distelli_user_home  = '/home/distelli',
-  String $distelli_user_shell = '/bin/bash',
+  String $distelli_user_password       = 'changeme',
+  String $distelli_user_shell          = '/bin/bash',
+  Boolean $install_chocolatey          = false,
+  Optional[String] $distelli_user_home = undef,
 ){
+  if $::facts['os']['family'] == 'windows' {
+    if $install_chocolatey {
+      include ::chocolatey
+    }
+    else {
+      notify { 'Distelli Agent module relies on the Archive module.  If requisite packages are not installed, Chocolatey will \
+      be needed to install packages.' : }
+    }
+
+    if $distelli_user_home == undef {
+      $homedir = 'C:/Users/distelli'
+    }
+    else {
+      $homedir = $distelli_user_home
+    }
+
+    user { 'distelli' :
+      ensure     => present,
+      comment    => 'Distelli User',
+      home       => $homedir,
+      groups     => ['Users','Administrators'],
+      password   => $distelli_user_password,
+      managehome => true,
+    }
+  }
+
   include '::archive'
 
   if $::facts['os']['family'] != 'windows' {
@@ -18,11 +46,19 @@ class distelli::deps (
       require  => Package['wget', 'bzip2'],
     }
 
+    if $distelli_user_home == undef {
+      $homedir = '/home/distelli'
+    }
+    else {
+      $homedir = $distelli_user_home
+    }
+
     user { 'distelli' :
       ensure     => present,
       comment    => 'Distelli User',
       shell      => $distelli_user_shell,
-      home       => $distelli_user_home,
+      password   => $distelli_user_password,
+      home       => $homedir,
       managehome => true,
     }
 

@@ -1,63 +1,26 @@
 class distelli::agent (
   Sensitive $access_token,
   Sensitive $secret_key,
-  String    $download_url = 'http://www.distelli.com/download/client',
-  String    $config_file  = '/etc/distelli.yml',
+  Boolean   $install_chocolatey = false,
   Optional[String]        $endpoint     = undef,
   Optional[String]        $version      = undef,
   Optional[Array[String]] $environments = undef,
 ){
-  require ::distelli::deps
 
-  if $::facts['os']['family'] != 'windows' {
-    $installdir = '/home/distelli'
-    $downloader = '/home/distelli/distelli_downloader.sh'
-    $client_installer = '/usr/local/bin/distelli'
-
-    if $version {
-      $url = "${download_url}/${version}"
+  if $::facts['os']['family'] == 'windows' {
+    if install_chocolatey {
+      class { ::distelli::deps :
+        install_chocolatey => true,
+      }
+      include ::distelli::agent::windows
     }
     else {
-      $url = $download_url
-    }
-
-    archive { $downloader :
-      source  => $url,
-      cleanup => false,
-      creates => $downloader,
-    }
-
-    file { $downloader :
-      ensure  => file,
-      owner   => 'distelli',
-      group   => 'distelli',
-      mode    => '0755',
-      require => Archive[$downloader],
-    }
-
-    exec { $downloader :
-      command => "/usr/bin/env sh ${downloader}",
-      require => File[$downloader],
-      creates => $client_installer,
-    }
-
-    file { $config_file :
-      ensure  => file,
-      owner   => 'distelli',
-      group   => 'distelli',
-      mode    => '0644',
-      content => epp('distelli/distelli.yml.epp'),
-      require => Exec[$downloader],
-    }
-
-    exec { $client_installer :
-      command => "${client_installer} agent install",
-      require => File[$config_file],
-      creates => '/distelli',
+      require ::distelli::deps
+      include ::distelli::agent::windows
     }
   }
   else {
-    #Windows install instructions
+    include ::distelli::agent::nix
   }
 
 }
