@@ -1,11 +1,23 @@
-class distelli::agent::nix (
-  $version      = '3.66.33',
-  $download_url = 'https://www.distelli.com/download/client',
-  $tempdir      = '/tmp',
-){
-  $agent_installer = "distelli.${::facts['kernel']}-${::facts['os']['architecture']}-${version}"
+class distelli::agent::nix inherits distelli::agent {
 
-  require ::distelli::deps
+  if $distelli::agent::version {
+    $version = $distelli::agent::version
+  }
+  else {
+    $version = '3.66.33'
+  }
+
+  if $distelli::agent::user_home {
+    $homedir = $distelli::agent::user_home
+  }
+  elsif $::facts['kernel'] == 'SunOS' {
+    $homedir = '/export/home/distelli'
+  }
+  else {
+    $homedir = '/home/distelli'
+  }
+
+  $agent_installer = "distelli.${::facts['kernel']}-${::facts['os']['architecture']}-${version}"
 
   case $::facts['os']['family'] {
     'Darwin': {
@@ -31,20 +43,22 @@ class distelli::agent::nix (
     }
   }
 
-  archive { "${::distelli::deps::homedir}/${archive}" :
+  archive { "${homedir}/${archive}" :
     source       => $url,
     # cleanup      => false,
+    user         => 'distelli',
+    group        => 'distelli',
     extract      => true,
-    extract_path => $::distelli::deps::homedir,
-    creates      => "${::distelli::deps::homedir}/${agent_installer}",
+    extract_path => $homedir,
+    creates      => "${homedir}/${agent_installer}",
   }
 
-  file { "${::distelli::deps::homedir}/${agent_installer}" :
+  file { "${homedir}/${agent_installer}" :
     ensure  => file,
     owner   => 'distelli',
     group   => 'distelli',
     mode    => '0755',
-    require => Archive["${::distelli::deps::homedir}/${archive}"],
+    require => Archive["${homedir}/${archive}"],
   }
 
   file { '/etc/distelli.yml' :
@@ -53,16 +67,16 @@ class distelli::agent::nix (
     group   => 'distelli',
     mode    => '0644',
     content => epp('distelli/distelli.yml.epp'),
-    # require => File["${::distelli::deps::homedir}/${agent_installer}"],
+    # require => File["${homedir}/${agent_installer}"],
   }
 
   exec { 'Test agent executable' :
-    command => "${::distelli::deps::homedir}/${agent_installer} version",
+    command => "${homedir}/${agent_installer} version",
     require => File['/etc/distelli.yml'],
   }
 
   exec { 'Install agent' :
-    command => "${::distelli::deps::homedir}/${agent_installer} agent install",
+    command => "${homedir}/${agent_installer} agent install",
     require => Exec['Test agent executable'],
     # creates => "${tempdir}/${agent_installer}",
   }
