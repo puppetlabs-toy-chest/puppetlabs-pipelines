@@ -39,10 +39,20 @@ class distelli::agent::darwin inherits distelli::agent {
     require => Exec['extract-distelli'],
   }
 
-  exec { 'Install agent' :
+  exec { 'install-distelli' :
     command => "/usr/local/bin/distelli agent install",
     unless  => '/usr/local/bin/distelli agent status',
     require => File['/etc/distelli.yml','/usr/local/bin/distelli'],
+  }
+
+  service { 'distelli-agent':
+    ensure   => running,
+    restart  => '/usr/local/bin/distelli agent start',
+    start    => '/usr/local/bin/distelli agent start',
+    status   => '/usr/local/bin/distelli agent status | /usr/bin/grep Running',
+    stop     => '/usr/local/bin/distelli agent stop',
+    provider => 'base',
+    require  => Exec['install-distelli'],
   }
 
 }
