@@ -1,7 +1,7 @@
 class distelli::deps::windows (
   $install_chocolatey     = $::distelli::agent::install_chocolatey,
-  $distelli_user_home     = $::distelli::agent::distelli_user_home,
-  $distelli_user_password = $::distelli::agent::distelli_user_password,
+  $distelli_user_home     = $::distelli::agent::user_home,
+  $distelli_user_password = $::distelli::agent::user_password,
   ){
   if $install_chocolatey {
     include ::chocolatey
@@ -20,12 +20,19 @@ class distelli::deps::windows (
     $homedir = $distelli_user_home
   }
 
+  if $distelli_user_password == undef {
+    $password = 'changeme'
+  }
+  else {
+    $password = $user_password
+  }
+
   user { 'distelli' :
     ensure     => present,
     comment    => 'Distelli User',
     home       => $homedir,
     groups     => ['Users','Administrators'],
-    password   => $distelli_user_password,
+    password   => $password,
     managehome => true,
   }
 }

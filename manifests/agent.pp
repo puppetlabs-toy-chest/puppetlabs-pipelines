@@ -23,6 +23,10 @@ class distelli::agent (
   Optional[String]        $version            = undef,
 ){
 
+  if $::facts['os']['family'] != 'windows' and $install_chocolatey == true {
+    warning('distelli::agent - "install_chocolatey" resource attribute was set to True for a non-Windows OS.  This will be ignored.')
+  }
+
   if $::facts['os']['family'] == 'windows' {
     require ::distelli::deps::windows
     include ::distelli::agent::windows

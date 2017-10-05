@@ -67,7 +67,7 @@ class distelli::agent::nix inherits distelli::agent {
     group   => 'distelli',
     mode    => '0644',
     content => epp('distelli/distelli.yml.epp'),
-    # require => File["${homedir}/${agent_installer}"],
+    require => File["${homedir}/${agent_installer}"],
   }
 
   exec { 'Test agent executable' :

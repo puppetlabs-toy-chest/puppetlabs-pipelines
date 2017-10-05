@@ -1,16 +1,7 @@
 class distelli::agent::windows (
   $version = '3.66.33',
-  $tempdir = 'C:/Users/vagrant/AppData/Local/Temp/1',
-  # $install_chocolatey = false,
+  $tempdir = 'C:/Users/distelli/AppData/Local/Temp/1',
 ){
-  # if $install_chocolatey {
-  #   class { ::distelli::deps :
-  #     install_chocolatey => true,
-  #   }
-  # }
-  # else {
-  #   require ::distelli_deps
-  # }
 
   if $::facts['os']['hardware'] == 'x86_64' {
     $archive = "distelli.Windows-AMD64-${version}.gz"
@@ -21,22 +12,25 @@ class distelli::agent::windows (
     $url = "https://s3.amazonaws.com/download.distelli.com/distelli.Windows-x86/${archive}"
   }
 
+  $workdir = 'C:/Program Files/Distelli'
+
   archive { "${tempdir}/${archive}" :
     source       => $url,
     # cleanup      => false,
     creates      => "${tempdir}/distelli",
     extract      => true,
     extract_path => $tempdir,
+    require      => User['distelli'],
   }
-
-  $workdir = 'C:/Program Files/Distelli'
 
   file { $workdir :
-    ensure => directory,
-    owner  => 'distelli',
-    group  => 'Administrators',
+    ensure  => directory,
+    owner   => 'distelli',
+    group   => 'Administrators',
+    require => User['distelli'],
   }
 
+  # Requires fqdn_rand_string function from puppetlabs/stdlib
   $distelli_exec = "distelli-${fqdn_rand_string(5)}.exe"
 
   exec { 'Copy executable' :
