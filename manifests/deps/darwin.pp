@@ -1,16 +1,32 @@
 class distelli::deps::darwin inherits distelli::agent {
 
-  if $::distelli::agent::distelli_user_shell == undef {
+  if $::distelli::agent::user_shell == undef {
     $shell = '/bin/bash'
   }
   else {
-    $shell = $::distelli::agent::distelli_user_shell
+    $shell = $::distelli::agent::user_shell
+  }
+
+  if $::distelli::agent::user_home {
+    $home = $::distelli::agent::user_home
+  }
+  else {
+    $home = '/Users/distelli'
+  }
+
+  if $::distelli::agent::user_password {
+    $password = $::distelli::agent::user_home
+  }
+  else {
+    $password = undef
   }
 
   user { 'distelli' :
-    ensure     => present,
-    comment    => 'Distelli User',
-    shell      => $shell,
+    ensure   => present,
+    comment  => 'Distelli User',
+    home     => $home,
+    shell    => $shell,
+    password => $password,
   }
 
   file { '/private/etc/sudoers.d/distelli' :

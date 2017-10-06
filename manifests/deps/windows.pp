@@ -1,30 +1,27 @@
-class distelli::deps::windows (
-  $install_chocolatey     = $::distelli::agent::install_chocolatey,
-  $distelli_user_home     = $::distelli::agent::user_home,
-  $distelli_user_password = $::distelli::agent::user_password,
-  ){
-  if $install_chocolatey {
+class distelli::deps::windows {
+
+  if $::distelli::agent::install_chocolatey {
     include ::chocolatey
   }
   else {
-    notify { 'Distelli Agent module relies on the Archive module.  If requisite packages are not installed, Chocolatey will \
-    be needed to install packages.' : }
+    notify { 'distelli::agent - Distelli Agent module relies on the Archive module.  If requisite packages are not installed, Chocolatey will \
+    be needed to install those packages.' : }
   }
 
   include ::archive
 
-  if $distelli_user_home == undef {
+  if $::distelli::agent::user_home {
+    $homedir = $::distelli::agent::user_home
+  }
+  else {
     $homedir = 'C:/Users/distelli'
   }
-  else {
-    $homedir = $distelli_user_home
-  }
 
-  if $distelli_user_password == undef {
-    $password = 'changeme'
+  if $::distelli::agent::user_password {
+    $password = $::distelli::agent::user_password
   }
   else {
-    $password = $user_password
+    $password = 'changeme'
   }
 
   user { 'distelli' :

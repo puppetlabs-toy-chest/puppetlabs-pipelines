@@ -1,4 +1,5 @@
 class distelli::agent::darwin inherits distelli::agent {
+  $url = "https://s3.amazonaws.com/download.distelli.com/distelli.Darwin-x86_64/distelli.Darwin-x86_64-${version}.gz"
 
   if $distelli::agent::version {
     $version = $distelli::agent::version
@@ -7,13 +8,10 @@ class distelli::agent::darwin inherits distelli::agent {
     $version = '3.66.33'
   }
 
-  $archive = "distelli.Darwin-x86_64-${version}.gz"
-  $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Darwin-x86_64/${archive}"
-
   exec { 'extract-distelli':
-    command  => "curl -sSL ${url} | gunzip -c > /usr/local/bin/distelli",
-    creates  => '/usr/local/bin/distelli',
-    path     => '/usr/bin',
+    command => "curl -sSL ${url} | gunzip -c > /usr/local/bin/distelli",
+    creates => '/usr/local/bin/distelli',
+    path    => '/usr/bin',
   }
 
   file { '/usr/local/bin/distelli':
@@ -40,7 +38,7 @@ class distelli::agent::darwin inherits distelli::agent {
   }
 
   exec { 'install-distelli' :
-    command => "/usr/local/bin/distelli agent install",
+    command => '/usr/local/bin/distelli agent install',
     unless  => '/usr/local/bin/distelli agent status',
     require => File['/etc/distelli.yml','/usr/local/bin/distelli'],
   }

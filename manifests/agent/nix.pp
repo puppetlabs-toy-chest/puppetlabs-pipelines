@@ -10,42 +10,25 @@ class distelli::agent::nix inherits distelli::agent {
   if $distelli::agent::user_home {
     $homedir = $distelli::agent::user_home
   }
-  elsif $::facts['kernel'] == 'SunOS' {
-    $homedir = '/export/home/distelli'
-  }
   else {
     $homedir = '/home/distelli'
   }
 
   $agent_installer = "distelli.${::facts['kernel']}-${::facts['os']['architecture']}-${version}"
 
-  case $::facts['os']['family'] {
-    'Darwin': {
-      $archive = "distelli.Darwin-${version}.gz"
-      $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Darwin-x86_64/${archive}"
+  if $::facts['kernel'] {
+    if $::facts['os']['architecture'] == 'x86_64' {
+      $archive = "distelli.Linux-x86_64-${version}.gz"
+      $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-x86_64/${archive}"
     }
-    'RedHat', 'Debian': {
-      if $::facts['os']['architecture'] == 'x86_64' {
-        $archive = "distelli.Linux-x86_64-${version}.gz"
-        $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-x86_64/${archive}"
-      }
-      else {
-        $archive = "distelli.Linux-i686-${version}.gz"
-        $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}"
-      }
-    }
-    'Solaris': {
-      $archive = "distelli.SunOS-i86pc-${version}.gz"
-      $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.SunOS-i86pc/${archive}"
-    }
-    default: {
-      fail("Unsupported OS family: ${::facts['os']['family']}, please contact support@puppet.com to add it")
+    else {
+      $archive = "distelli.Linux-i686-${version}.gz"
+      $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}"
     }
   }
 
   archive { "${homedir}/${archive}" :
     source       => $url,
-    # cleanup      => false,
     user         => 'distelli',
     group        => 'distelli',
     extract      => true,
@@ -71,14 +54,26 @@ class distelli::agent::nix inherits distelli::agent {
   }
 
   exec { 'Test agent executable' :
-    command => "${homedir}/${agent_installer} version",
-    require => File['/etc/distelli.yml'],
+    command     => "${homedir}/${agent_installer} version",
+    refreshonly => true,
+    require     => File['/etc/distelli.yml'],
+    subscribe   => File["${homedir}/${agent_installer}"],
   }
 
   exec { 'Install agent' :
-    command => "${homedir}/${agent_installer} agent install",
-    require => Exec['Test agent executable'],
-    # creates => "${tempdir}/${agent_installer}",
+    command     => "${homedir}/${agent_installer} agent install",
+    refreshonly => true,
+    subscribe   => Exec['Test agent executable'],
   }
+
+  # service { 'distelli-agent':
+  #   ensure    => running,
+  #   restart   => "${homedir}/${agent_installer} agent start",
+  #   start     => "${homedir}/${agent_installer} agent start",
+  #   status    => "${homedir}/${agent_installer} agent status | /usr/bin/grep Running",
+  #   stop      => "${homedir}/${agent_installer} agent stop",
+  #   provider  => 'base',
+  #   subscribe => [ File['/etc/distelli.yml'], Exec['Install agent'] ],
+  # }
 
 }
