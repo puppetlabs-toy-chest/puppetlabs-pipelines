@@ -33,7 +33,7 @@ class distelli::agent (
   }
   elsif $::facts['os']['family'] == 'Darwin' {
     require ::distelli::deps::darwin
-    include ::distelli::agent::nix
+    include ::distelli::agent::darwin
   }
   elsif $::facts['os']['name'] == 'Solaris' {
     require ::distelli::deps::solaris
