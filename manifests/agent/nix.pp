@@ -14,16 +14,19 @@ class distelli::agent::nix inherits distelli::agent {
     $homedir = '/home/distelli'
   }
 
-  $agent_installer = "distelli.${::facts['kernel']}-${::facts['os']['architecture']}-${version}"
-
-  if $::facts['kernel'] {
-    if $::facts['os']['architecture'] == 'x86_64' {
-      $archive = "distelli.Linux-x86_64-${version}.gz"
-      $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-x86_64/${archive}"
+  case $::facts['os']['architecture'] {
+    'x86_64', 'amd64': {
+      $archive         = "distelli.Linux-x86_64-${version}.gz"
+      $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-x86_64/${archive}"
+      $agent_installer = "distelli.${::facts['kernel']}-x86_64-${version}"
     }
-    else {
-      $archive = "distelli.Linux-i686-${version}.gz"
-      $url     = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}"
+    'i686': {
+      $archive         = "distelli.Linux-i686-${version}.gz"
+      $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}"
+      $agent_installer = "distelli.${::facts['kernel']}-${::facts['os']['architecture']}-${version}"
+    }
+    default : {
+      fail("distelli::agent - The ${::facts['os']['architecture']} architecture is not currently supported by the Distelli Module.  Please contact support@puppet.com")
     }
   }
 
@@ -65,15 +68,5 @@ class distelli::agent::nix inherits distelli::agent {
     refreshonly => true,
     subscribe   => Exec['Test agent executable'],
   }
-
-  # service { 'distelli-agent':
-  #   ensure    => running,
-  #   restart   => "${homedir}/${agent_installer} agent start",
-  #   start     => "${homedir}/${agent_installer} agent start",
-  #   status    => "${homedir}/${agent_installer} agent status | /usr/bin/grep Running",
-  #   stop      => "${homedir}/${agent_installer} agent stop",
-  #   provider  => 'base',
-  #   subscribe => [ File['/etc/distelli.yml'], Exec['Install agent'] ],
-  # }
 
 }
