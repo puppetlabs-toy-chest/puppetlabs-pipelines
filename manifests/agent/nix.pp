@@ -23,7 +23,7 @@ class distelli::agent::nix inherits distelli::agent {
     'i686': {
       $archive         = "distelli.Linux-i686-${version}.gz"
       $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}"
-      $agent_installer = "distelli.${::facts['kernel']}-${::facts['os']['architecture']}-${version}"
+      $agent_installer = "distelli.${::facts['kernel']}-i686-${version}"
     }
     default : {
       fail("distelli::agent - The ${::facts['os']['architecture']} architecture is not currently supported by the Distelli Module.  Please contact support@puppet.com")
