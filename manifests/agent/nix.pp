@@ -18,12 +18,12 @@ class distelli::agent::nix inherits distelli::agent {
     'x86_64', 'amd64': {
       $archive         = "distelli.Linux-x86_64-${version}.gz"
       $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-x86_64/${archive}"
-      $agent_installer = "distelli.${::facts['kernel']}-x86_64-${version}"
+      #$agent_installer = "distelli.${::facts['kernel']}-x86_64-${version}"
     }
     'i686': {
       $archive         = "distelli.Linux-i686-${version}.gz"
       $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}"
-      $agent_installer = "distelli.${::facts['kernel']}-i686-${version}"
+      #$agent_installer = "distelli.${::facts['kernel']}-i686-${version}"
     }
     default : {
       fail("distelli::agent - The ${::facts['os']['architecture']} architecture is not currently supported by the Distelli Module.  Please contact support@puppet.com")
@@ -36,15 +36,17 @@ class distelli::agent::nix inherits distelli::agent {
     group        => 'distelli',
     extract      => true,
     extract_path => $homedir,
-    creates      => "${homedir}/${agent_installer}",
+    creates      => "${homedir}/distelli",
+    require      => User['distelli'],
   }
 
-  file { "${homedir}/${agent_installer}" :
+  #file { "${homedir}/${agent_installer}" :
+  file { "${homedir}/distelli" :
     ensure  => file,
     owner   => 'distelli',
     group   => 'distelli',
     mode    => '0755',
-    require => Archive["${homedir}/${archive}"],
+    require => Archive["${homedir}/distelli"],
   }
 
   file { '/etc/distelli.yml' :
@@ -53,7 +55,16 @@ class distelli::agent::nix inherits distelli::agent {
     group   => 'distelli',
     mode    => '0644',
     content => epp('distelli/distelli.yml.epp'),
-    require => File["${homedir}/${agent_installer}"],
+    require => File["${homedir}/distelli"],
+  }
+
+  file { "${homedir}/${agent_installer}" :
+    ensure  => link,
+    owner   => 'distelli',
+    group   => 'distelli',
+    mode    => '0644',
+    target  => "${homedir}/distelli",
+    require => Archive["${homedir}/${archive}"],
   }
 
   exec { 'Test agent executable' :

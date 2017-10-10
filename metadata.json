@@ -1,0 +1,87 @@
+{
+  "name": "puppetlabs-distelli_agent",
+  "version": "0.1.0",
+  "author": "Puppet Inc",
+  "summary": "Installs, configures, and manages the Distelli agent service.",
+  "license": "Apache-2.0",
+  "source": "https://github.com/puppetlabs/distelli-agent",
+  "project_page": "https://github.com/puppetlabs/distelli-agent",
+  "issues_url": "https://tickets.puppetlabs.com/browse/MODULES",
+  "dependencies": [
+    { "name":"puppetlabs/stdlib","version_requirement":">= 4.13.1 < 5.0.0" },
+    { "name":"puppet/archive","version_requirement":">= 2.0.0" }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Darwin",
+      "operatingsystemrelease": [
+        "10.9",
+        "10.10",
+        "10.11"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Fedora",
+      "operatingsystemrelease": [
+        "24",
+        "25"
+      ]
+    },
+    {
+      "operatingsystem": "SLES",
+      "operatingsystemrelease": [
+        "11 SP1",
+        "12"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "14.04",
+        "16.04"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 4.7.0 < 6.0.0"
+    }
+  ],
+  "description": "Distelli agent Module for Darwin, Debian, Ubuntu, CentOS, RHEL, OEL, and Fedora."
+}

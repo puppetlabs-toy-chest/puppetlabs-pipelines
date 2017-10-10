@@ -1,4 +1,4 @@
-# distelli
+# puppetlabs-distelli_agent
 
 #### Table of Contents
 
@@ -38,8 +38,8 @@ Since [7zip](http://www.7-zip.org/) is required to allow the [Archive](https://f
 
 ```puppet
 class { '::distelli::agent':
-  access_token => 'super_long_access_token',
-  secret_key   => 'super_secret_key',
+  access_token => Sensitive('super_long_access_token'),
+  secret_key   => Sensitive('super_secret_key'),
 }
 ```
 
@@ -47,8 +47,8 @@ class { '::distelli::agent':
 
 ```puppet
 class { '::distelli::agent':
-  access_token       => 'super_long_access_token',
-  secret_key         => 'super_secret_key',
+access_token => Sensitive('super_long_access_token'),
+secret_key   => Sensitive('super_secret_key'),
   install_chocolatey => true,
 }
 ```
@@ -57,8 +57,8 @@ class { '::distelli::agent':
 
 ```puppet
 class { '::distelli::agent':
-  access_token => 'super_long_access_token',
-  secret_key   => 'super_secret_key',
+access_token => Sensitive('super_long_access_token'),
+secret_key   => Sensitive('super_secret_key'),
   environments => ['production', 'staging', 'development'],
 }
 ```
@@ -179,7 +179,7 @@ Default value: `undef`.
 
 ## Limitations
 
-This module has been tested on [all Distelli-supported platforms](https://www.distelli.com/docs/agent/installing-the-distelli-agent/) currently supported by [Puppet Enterprise](https://docs.puppet.com/pe/latest/sys_req_os.html#puppet-agent-platforms)
+This module has been tested on Linux-based
 
 ## Development
 
@@ -189,4 +189,4 @@ For more information, see our [module contribution guide.](https://docs.puppetla
 
 ### Contributors
 
-To see who's already involved, see the [list of contributors.](https://github.com/abrader/distelli-agent/graphs/contributors)
+To see who's already involved, see the [list of contributors.](https://github.com/puppetlabs/puppetlabs-distelli_agent/graphs/contributors)
