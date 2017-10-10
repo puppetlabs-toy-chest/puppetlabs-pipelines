@@ -67,8 +67,8 @@ secret_key   => Sensitive('super_secret_key'),
 
 ```puppet
 class { '::distelli::agent':
-  access_token => 'super_long_access_token',
-  secret_key   => 'super_secret_key',
+  access_token => Sensitive('super_long_access_token'),
+  secret_key   => Sensitive('super_secret_key'),
   endpoint     => 'us-east-1c:ip-10-0-2-219.ec2.internal:7000',
 }
 ```
@@ -77,8 +77,8 @@ class { '::distelli::agent':
 
 ```puppet
 class { '::distelli::agent':
-  access_token => 'super_long_access_token',
-  secret_key   => 'super_secret_key',
+  access_token => Sensitive('super_long_access_token'),
+  secret_key   => Sensitive('super_secret_key'),
   version      => '3.66.33',
 }
 ```
@@ -87,8 +87,8 @@ class { '::distelli::agent':
 
 ```puppet
 class { '::distelli::agent':
-  access_token       => 'super_long_access_token',
-  secret_key         => 'super_secret_key',
+  access_token => Sensitive('super_long_access_token'),
+  secret_key   => Sensitive('super_secret_key'),
   distelli_user_home => '/opt/distelli',
 }
 ```
