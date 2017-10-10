@@ -65,7 +65,7 @@ class distelli::agent::windows (
   }
 
   exec { 'Start distelli' :
-    command     => "C:/Progra~1/Distelli/distelli.exe agent install",
+    command     => 'C:/Progra~1/Distelli/distelli.exe agent install',
     subscribe   => [ File['C:/distelli.yml'], Exec['Test distelli.exe execution'] ],
     refreshonly => true,
   }
