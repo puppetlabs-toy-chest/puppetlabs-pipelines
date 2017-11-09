@@ -16,13 +16,13 @@ class distelli::agent::nix inherits distelli::agent {
 
   case $::facts['os']['architecture'] {
     'x86_64', 'amd64': {
-      $archive         = "distelli.Linux-x86_64-${version}.gz"
-      $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-x86_64/${archive}"
+      $archive         = "distelli.Linux-x86_64-${version}"
+      $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-x86_64/${archive}.gz"
       #$agent_installer = "distelli.${::facts['kernel']}-x86_64-${version}"
     }
     'i686': {
       $archive         = "distelli.Linux-i686-${version}.gz"
-      $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}"
+      $url             = "https://s3.amazonaws.com/download.distelli.com/distelli.Linux-i686/${archive}.gz"
       #$agent_installer = "distelli.${::facts['kernel']}-i686-${version}"
     }
     default : {
@@ -30,23 +30,23 @@ class distelli::agent::nix inherits distelli::agent {
     }
   }
 
-  archive { "${homedir}/${archive}" :
+  archive { "${homedir}/${archive}.gz" :
     source       => $url,
     user         => 'distelli',
     group        => 'distelli',
     extract      => true,
     extract_path => $homedir,
-    creates      => "${homedir}/distelli",
+    creates      => "${homedir}/${archive}",
     require      => User['distelli'],
   }
 
   #file { "${homedir}/${agent_installer}" :
-  file { "${homedir}/distelli" :
+  file { "${homedir}/${archive}" :
     ensure  => file,
     owner   => 'distelli',
     group   => 'distelli',
     mode    => '0755',
-    require => Archive["${homedir}/distelli"],
+    require => Archive["${homedir}/${archive}.gz"],
   }
 
   file { '/etc/distelli.yml' :
@@ -58,24 +58,24 @@ class distelli::agent::nix inherits distelli::agent {
     require => File["${homedir}/distelli"],
   }
 
-  file { "${homedir}/${agent_installer}" :
+  file { "${homedir}/distelli" :
     ensure  => link,
     owner   => 'distelli',
     group   => 'distelli',
     mode    => '0644',
-    target  => "${homedir}/distelli",
-    require => Archive["${homedir}/${archive}"],
+    target  => "${homedir}/${archive}",
+    require => Archive["${homedir}/${archive}.gz"],
   }
 
   exec { 'Test agent executable' :
-    command     => "${homedir}/${agent_installer} version",
+    command     => "${homedir}/distelli version",
     refreshonly => true,
     require     => File['/etc/distelli.yml'],
-    subscribe   => File["${homedir}/${agent_installer}"],
+    subscribe   => File["${homedir}/distelli"],
   }
 
   exec { 'Install agent' :
-    command     => "${homedir}/${agent_installer} agent install",
+    command     => "${homedir}/distelli agent install",
     refreshonly => true,
     subscribe   => Exec['Test agent executable'],
   }
