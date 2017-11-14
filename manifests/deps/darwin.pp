@@ -15,7 +15,7 @@ class distelli::deps::darwin inherits distelli::agent {
   }
 
   if $::distelli::agent::user_password {
-    $password = $::distelli::agent::user_home
+    $password = $::distelli::agent::user_password
   }
   else {
     $password = undef
