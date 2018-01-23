@@ -99,12 +99,15 @@ class pipelines::agent::unix {
   }
 
   service { 'distelli-agent':
-    ensure   => running,
-    restart  => "${user_home}/distelli agent start",
-    start    => "${user_home}/distelli agent start",
-    status   => "${user_home}/distelli agent status | /usr/bin/grep Running",
-    stop     => "${user_home}/distelli agent stop",
-    provider => 'base',
-    require  => Exec['pipelines::agent::unix Install agent'],
+    ensure    => running,
+    restart   => "${user_home}/distelli agent start",
+    start     => "${user_home}/distelli agent start",
+    status    => "${user_home}/distelli agent status | /usr/bin/grep Running",
+    stop      => "${user_home}/distelli agent stop",
+    provider  => 'base',
+    subscribe => [
+      Exec['pipelines::agent::unix Install agent'],
+      File['/etc/distelli.yml'],
+    ],
   }
 }
