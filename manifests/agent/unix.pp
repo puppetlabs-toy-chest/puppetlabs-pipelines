@@ -38,14 +38,14 @@ class pipelines::agent::unix {
     }
   }
 
-  archive { "${user_home}/versions/${executable}.gz":
+  archive { "${user_home}/${executable}.gz":
     source       => $url,
     user         => 'distelli',
     group        => $user_group,
     extract      => true,
-    extract_path => "${user_home}/versions",
-    creates      => "${user_home}/versions/${executable}",
-    require      => File["${user_home}/versions"],
+    extract_path => $user_home,
+    creates      => "${user_home}/${executable}",
+    require      => File[$user_home],
   }
 
   if ! defined(File['/opt']) {
@@ -63,17 +63,17 @@ class pipelines::agent::unix {
       group => $user_group,
       mode  => '0755',
     ;
-    [$user_home, "${user_home}/versions"]:
-      ensure  => directory,
+    $user_home:
+      ensure => directory,
     ;
-    "${user_home}/versions/${executable}":
+    "${user_home}/${executable}":
       ensure  => file,
-      require => Archive["${user_home}/versions/${executable}.gz"],
+      require => Archive["${user_home}/${executable}.gz"],
     ;
     "${user_home}/distelli":
       ensure  => link,
-      target  => "${user_home}/versions/${executable}",
-      require => File["${user_home}/versions/${executable}"],
+      target  => "${user_home}/${executable}",
+      require => File["${user_home}/${executable}"],
     ;
   }
 
