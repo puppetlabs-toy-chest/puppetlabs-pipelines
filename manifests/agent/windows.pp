@@ -17,11 +17,18 @@ class pipelines::agent::windows (
     $url = "https://s3.amazonaws.com/download.distelli.com/distelli.Windows-x86/${archive}"
   }
 
+  if $::distelli::agent::user_groups {
+    $user_groups = ['Users','Administrators'] + $::distelli::agent::user_groups
+  }
+  else {
+    $user_groups = ['Users','Administrators']
+  }
+
   user { 'distelli':
     ensure     => present,
     comment    => 'Puppet Pipelines User',
     home       => $pipelines::agent::user_home,
-    groups     => ['Users', 'Administrators'],
+    groups     => $user_groups,
     password   => $pipelines::agent::user_password,
     managehome => true,
   }
