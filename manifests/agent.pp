@@ -10,16 +10,18 @@
 # @param user_home Home directory for the agent user and executables.
 # @param user_shell Shell for the agent user. Defaults to false on Linux and
 #   macOS to prevent logins as the agent user.
+# @param user_groups [Optional[Array[String]] Supplemental groups for the agent (ex: docker). Default value: undef
 # @param user_password Password for the agent user. This must be set on Windows.
 # @param endpoint The URL or IP address and port for the agent service.
 # @param environments Pipelines environments that have access to this agent.
 class pipelines::agent (
   Sensitive[String[1]]           $access_token,
   Sensitive[String[1]]           $secret_key,
-  String[1]                      $version        = '3.66.33',
+  String[1]                      $version        = '3.66.45',
   Boolean                        $manage_sudoers = true,
   String[1]                      $user_home      = $pipelines::agent::params::user_home,
   Optional[String[1]]            $user_shell     = $pipelines::agent::params::user_shell,
+  Optional[Array[String]]        $user_groups    = undef,
   Optional[Sensitive[String[1]]] $user_password  = undef,
   Optional[String[1]]            $endpoint       = undef,
   Optional[Array[String[1]]]     $environments   = undef,

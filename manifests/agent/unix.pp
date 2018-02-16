@@ -16,6 +16,7 @@ class pipelines::agent::unix {
     comment  => 'Puppet Pipelines User',
     home     => $user_home,
     shell    => $pipelines::agent::user_shell,
+    groups   => $::distelli::agent::user_groups,
     password => $pipelines::agent::user_password,
     system   => true,
   }
