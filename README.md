@@ -56,7 +56,7 @@ class { 'pipelines::agent':
 
 ```puppet
 include chocolatey
-class { 'distelli::agent':
+class { 'pipelines::agent':
   access_token  => Sensitive('super_long_access_token'),
   secret_key    => Sensitive('super_secret_key'),
   user_password => Sensitive('secret_user_password'),
