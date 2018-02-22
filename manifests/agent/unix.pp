@@ -52,15 +52,6 @@ class pipelines::agent::unix {
     require      => File[$user_home],
   }
 
-  if ! defined(File['/opt']) {
-    file { '/opt':
-      ensure => directory,
-      owner  => 'root',
-      group  => 0,
-      mode   => '0755',
-    }
-  }
-
   file {
     default:
       owner => 'distelli',
