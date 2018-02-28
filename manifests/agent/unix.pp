@@ -7,7 +7,10 @@ class pipelines::agent::unix {
   $user_group = $pipelines::agent::user_group
   $sudoers_path = $pipelines::agent::sudoers_path
 
-  $prefix = "distelli.${facts['kernel']}-${facts['os']['hardware']}"
+  $prefix = $facts['architecture'] ? {
+    /(armv6l|armv7l)/ => "distelli.${facts['kernel']}-${facts['architecture']}",
+    default           => "distelli.${facts['kernel']}-${facts['os']['hardware']}",
+  }
   $executable = "${prefix}-${version}"
   $url = "https://s3.amazonaws.com/download.distelli.com/${prefix}/${executable}.gz"
 
