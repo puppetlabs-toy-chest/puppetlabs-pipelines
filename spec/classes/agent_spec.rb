@@ -13,7 +13,7 @@ describe 'pipelines::agent' do
     end
   end
 
-  context "on Raspbian 9" do
+  context 'on Raspbian 9' do
     let(:params) { {
       'access_token' => RSpec::Puppet::RawString.new("Sensitive('token')"),
       'secret_key'   => RSpec::Puppet::RawString.new("Sensitive('key')"),
@@ -52,8 +52,46 @@ describe 'pipelines::agent' do
           })
         end
         it { is_expected.to compile }
-        it { is_expected.to contain_archive("/opt/distelli/distelli.Linux-#{arch}-1.2.3.gz") }
+        it { is_expected.to contain_archive("/home/distelli/distelli.Linux-#{arch}-1.2.3.gz") }
       end
     end
+  end
+
+  context 'on macOS 10.13' do
+    let(:params) { {
+      'access_token' => RSpec::Puppet::RawString.new("Sensitive('token')"),
+      'secret_key'   => RSpec::Puppet::RawString.new("Sensitive('key')"),
+      'version'      => '1.2.3',
+    } }
+
+    let(:facts) do
+      {
+        'kernel'    => 'Darwin',
+        'os'        => {
+          'architecture' => 'x86_64',
+          'family'       => 'Darwin',
+          'hardware'     => 'x86_64',
+          'macosx'       => {
+            'build'   => '17D102',
+            'product' => 'Mac OS X',
+            'version' => {
+              'full'  => '10.13.3',
+              'major' => '10.13',
+              'minor' => '3'
+            }
+          },
+          'name'    => 'Darwin',
+          'release' => {
+            'full'  => '17.4.0',
+            'major' => '17',
+            'minor' => '4'
+          }
+        }
+      }
+    end
+
+    it { is_expected.to compile }
+    it { is_expected.to contain_archive('/Users/distelli/distelli.Darwin-x86_64-1.2.3.gz') }
+        
   end
 end

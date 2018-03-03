@@ -9,12 +9,20 @@
   "issues_url": "https://tickets.puppetlabs.com/browse/MODULES",
   "dependencies": [
     {
-      "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 4.13.1 < 5.0.0"
-    },
-    {
       "name": "puppet/archive",
       "version_requirement": ">= 2.0.0 < 3.0.0"
+    },
+    {
+      "name": "puppetlabs/chocolatey",
+      "version_requirement": ">= 3.0.0 < 4.0.0"
+    },
+    {
+      "name": "puppet/powershell",
+      "version_requirement": ">= 2.0.0 < 3.0.0"
+    },
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 4.13.1 < 5.0.0"
     }
   ],
   "operatingsystem_support": [
@@ -75,6 +83,12 @@
       "operatingsystemrelease": [
         "7",
         "8",
+        "9"
+      ]
+    },
+    {
+      "operatingsystem": "Raspbian",
+      "operatingsystemrelease": [
         "9"
       ]
     },
