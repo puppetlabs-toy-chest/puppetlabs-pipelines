@@ -13,8 +13,6 @@ management servers.
 
 ## Usage
 
-### TL;DR
-
 ```puppet
 class { 'pipelines::agent':
   access_token => Sensitive('super_long_access_token'),
