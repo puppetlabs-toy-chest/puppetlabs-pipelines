@@ -1,26 +1,24 @@
 # Install the Puppet Pipelines agent on Windows
 #
 # Do not use directly; use pipelines::agent.
-class pipelines::agent::windows (
-  $tempdir = 'C:/Users/distelli/AppData/Local/Temp/1',
-) {
-  $version = $pipelines::agent::version
-  $workdir = 'C:/Program Files/Distelli'
-  $distelli_exec = 'distelli-1.exe'
+class pipelines::agent::windows {
+  $env = $facts['pipelines_env']
+  $program_dir = "${env['ProgramFiles']}\\Distelli"
+  $configuration_path = "${env['SystemDrive']}\\distelli.yml"
 
-  if $facts['os']['hardware'] == 'x86_64' {
-    $archive = "distelli.Windows-AMD64-${version}.gz"
-    $url = "https://s3.amazonaws.com/download.distelli.com/distelli.Windows-AMD64/${archive}"
+  $version = $pipelines::agent::version
+  $architecture = $facts['os']['hardware'] ? {
+    'x86_64' => 'AMD64',
+    default  => 'x86',
   }
-  else {
-    $archive = "distelli.Windows-x86-${version}.gz"
-    $url = "https://s3.amazonaws.com/download.distelli.com/distelli.Windows-x86/${archive}"
-  }
+
+  $prefix = "distelli.Windows-${architecture}"
+  $archive = "${prefix}-${version}.gz"
+  $url = "https://s3.amazonaws.com/download.distelli.com/${prefix}/${archive}"
 
   if $pipelines::agent::user_groups {
     $user_groups = ['Users','Administrators'] + $pipelines::agent::user_groups
-  }
-  else {
+  } else {
     $user_groups = ['Users','Administrators']
   }
 
@@ -33,44 +31,44 @@ class pipelines::agent::windows (
     managehome => true,
   }
 
-  archive { "${tempdir}/${archive}":
-    source       => $url,
-    creates      => "${tempdir}/distelli",
-    extract      => true,
-    extract_path => $tempdir,
-    require      => User['distelli'],
-  }
-
-  file { $workdir:
+  file { $program_dir:
     ensure => directory,
     owner  => 'distelli',
     group  => 'Administrators',
   }
 
-  exec { 'pipelines::agent::windows Copy executable':
-    command   => "Copy-Item ${tempdir}/distelli \$ENV:ProgramFiles/Distelli/${distelli_exec}",
-    unless    => "If (Test-Path -Path \$ENV:ProgramFiles/Distelli/${distelli_exec}) { exit 0 } else { exit 1 }",
-    provider  => powershell,
-    logoutput => true,
-    require   => File[$workdir],
-    subscribe => Archive["${tempdir}/${archive}"],
+  archive { "${env['TEMP']}\\${archive}":
+    source       => $url,
+    creates      => "${program_dir}\\distelli",
+    extract      => true,
+    extract_path => $program_dir,
+    require      => User['distelli'],
   }
 
-  file { ["${workdir}/distelli.exe",  "${workdir}/dagent.exe", "${workdir}/dtk.exe"]:
-    ensure  => link,
-    target  => "${workdir}/${distelli_exec}",
-    require => Exec['pipelines::agent::windows Copy executable'],
+  file { "${program_dir}\\distelli-1.exe":
+    source    => "${program_dir}\\distelli",
+    subscribe => Archive["${env['TEMP']}\\${archive}"],
+  }
+
+  file {
+    default:
+      ensure  => link,
+      target  => "${program_dir}\\distelli-1.exe",
+      require => File["${program_dir}\\distelli-1.exe"],
+    ;
+    "${program_dir}\\distelli.exe":;
+    "${program_dir}\\dagent.exe":;
+    "${program_dir}\\dtk.exe":;
   }
 
   exec { 'pipelines::agent::windows Test distelli.exe execution':
-    command     => '& $ENV:ProgramFiles/Distelli/distelli.exe version',
-    provider    => powershell,
+    command     => "\"${program_dir}\\distelli.exe\" version",
     logoutput   => true,
     refreshonly => true,
-    subscribe   => File["${workdir}/distelli.exe"],
+    subscribe   => File["${program_dir}\\distelli.exe"],
   }
 
-  file { 'C:/distelli.yml':
+  file { $configuration_path:
     ensure    => file,
     owner     => 'distelli',
     group     => 'Administrators',
@@ -80,9 +78,9 @@ class pipelines::agent::windows (
   }
 
   exec { 'pipelines::agent::windows Start distelli':
-    command     => 'C:/Progra~1/Distelli/distelli.exe agent install',
+    command     => "\"${program_dir}\\distelli.exe\" agent install",
     subscribe   => [
-      File['C:/distelli.yml'],
+      File[$configuration_path],
       Exec['pipelines::agent::windows Test distelli.exe execution']
     ],
     refreshonly => true,
