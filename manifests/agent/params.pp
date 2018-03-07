@@ -14,7 +14,7 @@ class pipelines::agent::params {
       $sudoers_path = '/private/etc/sudoers'
     }
     'windows': {
-      $user_home = 'C:/Users/distelli'
+      $user_home = undef
       $user_shell = undef
     }
     default: {

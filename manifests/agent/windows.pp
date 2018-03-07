@@ -23,12 +23,10 @@ class pipelines::agent::windows {
   }
 
   user { 'distelli':
-    ensure     => present,
-    comment    => 'Puppet Pipelines User',
-    home       => $pipelines::agent::user_home,
-    groups     => $user_groups,
-    password   => $pipelines::agent::user_password,
-    managehome => true,
+    ensure   => present,
+    comment  => 'Puppet Pipelines User',
+    groups   => $user_groups,
+    password => $pipelines::agent::user_password,
   }
 
   file { $program_dir:
