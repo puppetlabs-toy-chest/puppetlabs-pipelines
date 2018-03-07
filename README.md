@@ -99,7 +99,6 @@ class { 'pipelines::agent':
 class { 'pipelines::agent':
   access_token => Sensitive('super_long_access_token'),
   secret_key   => Sensitive('super_secret_key'),
-  user_home    => '/opt/distelli',
 }
 ```
 
