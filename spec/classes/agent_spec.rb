@@ -11,7 +11,13 @@ describe 'pipelines::agent' do
       end
       let(:facts) { os_facts }
 
-      it { is_expected.to compile }
+      it do
+        if os =~ /^windows-/
+          skip "https://github.com/danielparks/puppetlabs-pipelines/issues/9"
+        else
+          is_expected.to compile
+        end
+      end
     end
   end
 
