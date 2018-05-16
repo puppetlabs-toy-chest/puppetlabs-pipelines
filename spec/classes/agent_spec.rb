@@ -12,8 +12,8 @@ describe 'pipelines::agent' do
       let(:facts) { os_facts }
 
       it do
-        if os =~ /^windows-/
-          skip "https://github.com/danielparks/puppetlabs-pipelines/issues/9"
+        if os =~ %r{^windows-}
+          skip 'https://github.com/danielparks/puppetlabs-pipelines/issues/9'
         else
           is_expected.to compile
         end
