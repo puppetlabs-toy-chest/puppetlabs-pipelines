@@ -16,7 +16,7 @@
 class pipelines::agent (
   Sensitive[String[1]]           $access_token,
   Sensitive[String[1]]           $secret_key,
-  String[1]                      $version        = '3.66.45',
+  String[1]                      $version        = '3.66.51',
   Boolean                        $manage_sudoers = true,
   Optional[String[1]]            $user_shell     = $pipelines::agent::params::user_shell,
   Optional[Array[String]]        $user_groups    = undef,
