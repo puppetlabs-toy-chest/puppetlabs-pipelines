@@ -76,7 +76,7 @@ class pipelines::agent::unix {
     ensure    => file,
     owner     => 'distelli',
     group     => $user_group,
-    mode      => '0644',
+    mode      => '0640',
     content   => epp('pipelines/distelli.yml.epp'),
     show_diff => false,
   }
