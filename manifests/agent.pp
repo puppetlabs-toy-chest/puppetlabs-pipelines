@@ -1,47 +1,33 @@
-# distelli::agent
+# Install the Puppet Pipelines agent
 #
-# Main class, includes all other classes.
+# On Windows you will need to install chocolately (`include chocolately`), or
+# configure the `archive` class so it can find 7zip.
 #
-# @param access_token [Sensitive] First half of the credentials required to authenticate your Distelli Agent for build or credential storage purposes. Default value: undef.
-# @param secret_key [Sensitive] Second half of the credentials required to authenticate your Distelli Agent for build or credential storage purposes. Default value: undef.
-# @param install_chocolatey [Boolean] This will install the Chocolatey package management system.  Chocolatey is needed to install 7zip on Windows.  Default value: false.
-# @param endpoint [Optional[String]] This is the URL or IP address and port for the Distelli agent service. Default value: undef.
-# @param user_home [Optional[String]] Home directory for the Distelli user and Distelli executables. Default value: undef.
-# @param user_shell [Optional[String]] Preferred shell for the Distelli user and Distelli executables. Default value: undef.
-# @param user_password [Optional[Sensitive]] Password for the Distelli user and Distelli executables. Default value: undef.
-# @param environments [Optional[String]] Distelli specific environments of which have access to this agent. Default value: undef.
-# @param version [Optional[String]] Preferred version of Distelli agent to be instlled. Default value: undef.
-
-class distelli::agent (
-  Sensitive               $access_token,
-  Sensitive               $secret_key,
-  Boolean                 $install_chocolatey = false,
-  Optional[String]        $endpoint           = undef,
-  Optional[String]        $user_home          = undef,
-  Optional[String]        $user_shell         = undef,
-  Optional[Sensitive]     $user_password      = undef,
-  Optional[Array[String]] $environments       = undef,
-  Optional[String]        $version            = undef,
-){
-
-  if $::facts['os']['family'] != 'windows' and $install_chocolatey == true {
-    warning('distelli::agent - "install_chocolatey" resource attribute was set to True for a non-Windows OS.  This will be ignored.')
+# @param access_token First half of the credentials to authenticate the agent.
+# @param secret_key Second half of the credentials to authenticate the agent.
+# @param version Version of the agent to install.
+# @param manage_sudoers Whether to manage the agent users's sudo access.
+# @param user_shell Shell for the agent user. Defaults to false on Linux and
+#   macOS to prevent logins as the agent user.
+# @param user_groups [Optional[Array[String]] Supplemental groups for the agent (ex: docker). Default value: undef
+# @param user_password Password for the agent user. This must be set on Windows.
+# @param endpoint The URL or IP address and port for the agent service.
+# @param environments Pipelines environments that have access to this agent.
+class pipelines::agent (
+  Sensitive[String[1]]           $access_token,
+  Sensitive[String[1]]           $secret_key,
+  String[1]                      $version        = '3.66.51',
+  Boolean                        $manage_sudoers = true,
+  Optional[String[1]]            $user_shell     = $pipelines::agent::params::user_shell,
+  Optional[Array[String]]        $user_groups    = undef,
+  Optional[Sensitive[String[1]]] $user_password  = undef,
+  Optional[String[1]]            $endpoint       = undef,
+  Optional[Array[String[1]]]     $environments   = undef,
+) inherits pipelines::agent::params {
+  case $facts['kernel'] {
+    'Linux':   { contain pipelines::agent::unix }
+    'Darwin':  { contain pipelines::agent::unix }
+    'windows': { contain pipelines::agent::windows }
+    default:   { fail("pipelines::agent doesn't support OS ${facts['kernel']}") }
   }
-
-  if $::facts['os']['family'] == 'windows' {
-    require ::distelli::deps::windows
-    include ::distelli::agent::windows
-  }
-  elsif $::facts['os']['family'] == 'Darwin' {
-    require ::distelli::deps::darwin
-    include ::distelli::agent::darwin
-  }
-  elsif $::facts['kernel'] == 'Linux' {
-    require ::distelli::deps::nix
-    include ::distelli::agent::nix
-  }
-  else {
-    fail("${::facts['os']['family']} is not currently supported by the Distelli Module.  Please contact support@puppet.com")
-  }
-
 }

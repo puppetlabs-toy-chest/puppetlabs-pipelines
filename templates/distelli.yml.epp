@@ -1,11 +1,11 @@
-DistelliAccessToken: '<%= $distelli::agent::access_token.unwrap %>'
-DistelliSecretKey: '<%= $distelli::agent::secret_key.unwrap %>'
-<%  if $distelli::agent::endpoint { -%>
-AgentEndpoint: '<%= $distelli::agent::endpoint %>'
+DistelliAccessToken: '<%= $pipelines::agent::access_token.unwrap %>'
+DistelliSecretKey: '<%= $pipelines::agent::secret_key.unwrap %>'
+<%  if $pipelines::agent::endpoint { -%>
+AgentEndpoint: '<%= $pipelines::agent::endpoint %>'
 <%  }
-    if $distelli::agent::environments and $distelli::agent::environments.size > 0 { -%>
+    if $pipelines::agent::environments and $pipelines::agent::environments.size > 0 { -%>
 Environments:
-<%      $distelli::agent::environments.each |$env| { -%>
+<%      $pipelines::agent::environments.each |$env| { -%>
   - <%= $env %>
 <%      }
     } %>

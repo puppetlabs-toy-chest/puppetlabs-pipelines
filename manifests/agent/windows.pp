@@ -1,73 +1,86 @@
-class distelli::agent::windows (
-  $version = '3.66.33',
-  $tempdir = 'C:/Users/distelli/AppData/Local/Temp/1',
-){
+# Install the Puppet Pipelines agent on Windows
+#
+# Do not use directly; use pipelines::agent.
+class pipelines::agent::windows {
+  $env = $facts['pipelines_env']
+  $program_dir = "${env['ProgramFiles']}\\Distelli"
+  $configuration_path = "${env['SystemDrive']}\\distelli.yml"
 
-  if $::facts['os']['hardware'] == 'x86_64' {
-    $archive = "distelli.Windows-AMD64-${version}.gz"
-    $url = "https://s3.amazonaws.com/download.distelli.com/distelli.Windows-AMD64/${archive}"
+  $version = $pipelines::agent::version
+  $architecture = $facts['os']['hardware'] ? {
+    'x86_64' => 'AMD64',
+    default  => 'x86',
   }
-  else {
-    $archive = "distelli.Windows-x86-${version}.gz"
-    $url = "https://s3.amazonaws.com/download.distelli.com/distelli.Windows-x86/${archive}"
+
+  $prefix = "distelli.Windows-${architecture}"
+  $archive = "${prefix}-${version}.gz"
+  $url = "https://s3.amazonaws.com/download.distelli.com/${prefix}/${archive}"
+
+  if $pipelines::agent::user_groups {
+    $user_groups = ['Users','Administrators'] + $pipelines::agent::user_groups
+  } else {
+    $user_groups = ['Users','Administrators']
   }
 
-  $workdir = 'C:/Program Files/Distelli'
+  user { 'distelli':
+    ensure   => present,
+    comment  => 'Puppet Pipelines User',
+    groups   => $user_groups,
+    password => $pipelines::agent::user_password,
+  }
 
-  archive { "${tempdir}/${archive}" :
+  file { $program_dir:
+    ensure => directory,
+    owner  => 'distelli',
+    group  => 'Administrators',
+  }
+
+  archive { "${env['TEMP']}\\${archive}":
     source       => $url,
-    # cleanup      => false,
-    creates      => "${tempdir}/distelli",
+    creates      => "${program_dir}\\distelli",
     extract      => true,
-    extract_path => $tempdir,
+    extract_path => $program_dir,
     require      => User['distelli'],
   }
 
-  file { $workdir :
-    ensure  => directory,
-    owner   => 'distelli',
-    group   => 'Administrators',
-    require => User['distelli'],
+  file { "${program_dir}\\distelli-1.exe":
+    source    => "${program_dir}\\distelli",
+    subscribe => Archive["${env['TEMP']}\\${archive}"],
   }
 
-  # Requires fqdn_rand_string function from puppetlabs/stdlib
-  $distelli_exec = "distelli-${fqdn_rand_string(5)}.exe"
-
-  exec { 'Copy executable' :
-    command   => "Copy-Item ${tempdir}/distelli \$ENV:ProgramFiles/Distelli/${distelli_exec}",
-    unless    => "If (Test-Path -Path \$ENV:ProgramFiles/Distelli/${distelli_exec}) { exit 0 } else { exit 1}",
-    provider  => powershell,
-    require   => File[$workdir],
-    logoutput => true,
+  file {
+    default:
+      ensure  => link,
+      target  => "${program_dir}\\distelli-1.exe",
+      require => File["${program_dir}\\distelli-1.exe"],
+    ;
+    "${program_dir}\\distelli.exe":;
+    "${program_dir}\\dagent.exe":;
+    "${program_dir}\\dtk.exe":;
   }
 
-  file { ["${workdir}/distelli.exe",  "${workdir}/dagent.exe", "${workdir}/dtk.exe"] :
-    ensure  => link,
-    target  => "${workdir}/${distelli_exec}",
-    require => Exec['Copy executable'],
-  }
-
-  exec { 'Test distelli.exe execution' :
-    command     => "& \$ENV:ProgramFiles/Distelli/distelli.exe version",
-    provider    => powershell,
-    subscribe   => File["${workdir}/distelli.exe"],
+  exec { 'pipelines::agent::windows Test distelli.exe execution':
+    command     => "\"${program_dir}\\distelli.exe\" version",
     logoutput   => true,
     refreshonly => true,
+    subscribe   => File["${program_dir}\\distelli.exe"],
   }
 
-  file { 'C:/distelli.yml' :
-    ensure  => file,
-    owner   => 'distelli',
-    group   => 'Administrators',
-    mode    => '0644',
-    content => epp('distelli/distelli.yml.epp'),
-    require => Exec['Test distelli.exe execution'],
+  file { $configuration_path:
+    ensure    => file,
+    owner     => 'distelli',
+    group     => 'Administrators',
+    mode      => '0644',
+    content   => epp('pipelines/distelli.yml.epp'),
+    show_diff => false,
   }
 
-  exec { 'Start distelli' :
-    command     => 'C:/Progra~1/Distelli/distelli.exe agent install',
-    subscribe   => [ File['C:/distelli.yml'], Exec['Test distelli.exe execution'] ],
+  exec { 'pipelines::agent::windows Start distelli':
+    command     => "\"${program_dir}\\distelli.exe\" agent install",
+    subscribe   => [
+      File[$configuration_path],
+      Exec['pipelines::agent::windows Test distelli.exe execution']
+    ],
     refreshonly => true,
   }
-
 }
