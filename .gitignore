@@ -1,2 +1,4 @@
 /examples
-
+/pkg
+/vendor
+/Gemfile.lock
