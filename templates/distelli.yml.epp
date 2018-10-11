@@ -1,11 +1,13 @@
-DistelliAccessToken: '<%= $pipelines::agent::access_token.unwrap %>'
-DistelliSecretKey: '<%= $pipelines::agent::secret_key.unwrap %>'
-<%  if $pipelines::agent::endpoint { -%>
-AgentEndpoint: '<%= $pipelines::agent::endpoint %>'
-<%  }
-    if $pipelines::agent::environments and $pipelines::agent::environments.size > 0 { -%>
+<%- | Sensitive[String[1]]       $access_token,
+      Sensitive[String[1]]       $secret_key,
+      Optional[Array[String[1]]] $environments,
+    | -%>
+# This file is managed by puppet
+DistelliAccessToken: '<%= $access_token.unwrap %>'
+DistelliSecretKey: '<%= $secret_key.unwrap %>'
+<%  if $environments and $environments.size > 0 { -%>
 Environments:
-<%      $pipelines::agent::environments.each |$env| { -%>
+<%      $environments.each |$env| { -%>
   - <%= $env %>
 <%      }
     } %>

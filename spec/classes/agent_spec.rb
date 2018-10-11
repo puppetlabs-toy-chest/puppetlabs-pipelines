@@ -53,7 +53,7 @@ describe 'pipelines::agent' do
       }
     end
 
-    %w[armv6l armv7l].each do |arch|
+    ['armv6l', 'armv7l'].each do |arch|
       context "on #{arch}" do
         let(:facts) do
           super().merge(
