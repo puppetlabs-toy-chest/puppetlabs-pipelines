@@ -29,13 +29,14 @@ class pipelines::agent::windows {
     require => Exec["mkdir ${install_dir}"],
   }
   exec { 'pipelines::agent download':
+    provider    => powershell,
     require     => Exec["mkdir ${install_dir}"],
     creates     => "${install_dir}\\distelli.exe",
     path        => $facts['path'],
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
-    command     => $download_cmd,
+    command     => $download_location,
   }
   if $pipelines::agent::start_agent {
     $distelli_yml_vars = {

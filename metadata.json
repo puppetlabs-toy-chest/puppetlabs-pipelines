@@ -9,7 +9,7 @@
   "issues_url": "https://tickets.puppetlabs.com/browse/MODULES",
   "dependencies": [
     {
-      "name": "puppet/archive",
+      "name": "puppetlabs/powershell",
       "version_requirement": ">= 2.0.0 < 3.0.0"
     },
     {
