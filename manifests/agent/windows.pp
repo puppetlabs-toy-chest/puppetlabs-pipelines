@@ -30,13 +30,13 @@ class pipelines::agent::windows {
   }
   exec { 'pipelines::agent download':
     provider    => powershell,
-    require     => Exec["mkdir ${install_dir}"],
+    require     => File[$download_location],
     creates     => "${install_dir}\\distelli.exe",
     path        => $facts['path'],
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
-    command     => $download_location,
+    command     => "& \"$download_location\"; Exit 0",
   }
   if $pipelines::agent::start_agent {
     $distelli_yml_vars = {
@@ -51,11 +51,12 @@ class pipelines::agent::windows {
       show_diff => false,
     }
     if $pipelines::agent::data_dir {
-      $install_cmd = "cmd.exe /c \"distelli agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml <nil\""
+      $install_cmd = "& \"${install_dir}\\distelli.exe\" agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml"
     } else {
-      $install_cmd = "cmd.exe /c \"distelli agent install -readyml <nil\""
+      $install_cmd = "& \"${install_dir}\\distelli.exe\" agent install -readyml"
     }
     exec { 'pipelines::agent install':
+      provider    => powershell,
       command     => $install_cmd,
       subscribe   => [
         Exec['pipelines::agent download'],
