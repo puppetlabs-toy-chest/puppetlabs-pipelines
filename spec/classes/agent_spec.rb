@@ -9,15 +9,20 @@ describe 'pipelines::agent' do
           'secret_key' => RSpec::Puppet::RawString.new("Sensitive('key')"),
         }
       end
-      let(:facts) { os_facts }
 
-      it do
-        if os =~ %r{^windows-}
-          skip 'https://github.com/danielparks/puppetlabs-pipelines/issues/9'
-        else
-          is_expected.to compile
+      if os =~ %r{^windows-}
+        let(:facts) do
+          os_facts.merge(
+            'pipelines_env' => {
+              'ProgramFiles' => 'C:\\Program Files',
+              'SystemDrive' => 'C:',
+            },
+          )
         end
+      else
+        let(:facts) { os_facts }
       end
+      it { is_expected.to compile }
     end
   end
 
@@ -50,6 +55,7 @@ describe 'pipelines::agent' do
             'minordistrelease' => '3',
           },
         },
+        'path' => '/usr/bin:/bin',
       }
     end
 
@@ -63,7 +69,6 @@ describe 'pipelines::agent' do
         end
 
         it { is_expected.to compile }
-        it { is_expected.to contain_archive("/home/distelli/distelli.Linux-#{arch}-1.2.3.gz") }
       end
     end
   end
@@ -100,10 +105,10 @@ describe 'pipelines::agent' do
             'minor' => '4',
           },
         },
+        'path' => '/usr/bin:/bin',
       }
     end
 
     it { is_expected.to compile }
-    it { is_expected.to contain_archive('/Users/distelli/distelli.Darwin-x86_64-1.2.3.gz') }
   end
 end
