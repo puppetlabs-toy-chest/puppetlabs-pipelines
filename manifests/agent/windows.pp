@@ -36,12 +36,12 @@ class pipelines::agent::windows {
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
-    command     => "& \"$download_location\"; Exit 0",
+    command     => "& \"${download_location}\"; Exit 0",
   }
   if $pipelines::agent::start_agent {
     $distelli_yml_vars = {
       access_token => $pipelines::agent::access_token,
-      secret_key => $pipelines::agent::secret_key,
+      secret_key   => $pipelines::agent::secret_key,
       environments => $pipelines::agent::environments,
     }
     file { $agent_conf_file:

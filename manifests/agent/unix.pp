@@ -16,15 +16,14 @@ class pipelines::agent::unix {
   $download_location = "${install_dir}/distelli-download"
   $download_cmd = "cat \"${download_location}\" | sh"
   $agent_conf_file = '/etc/distelli.yml'
-  $mkdir_cmd = "mkdir -p"
 
   exec { "mkdir ${install_dir}":
-    command => "mkdir -p",
+    command => 'mkdir -p',
     path    => $facts['path'],
     onlyif  => "true && ! [ -d ${install_dir} ]",
   }
   file { $download_location:
-    source => $download_url,
+    source  => $download_url,
     require => Exec["mkdir ${install_dir}"],
   }
   exec { 'pipelines::agent download':
@@ -39,7 +38,7 @@ class pipelines::agent::unix {
   if $pipelines::agent::start_agent {
     $distelli_yml_vars = {
       access_token => $pipelines::agent::access_token,
-      secret_key => $pipelines::agent::secret_key,
+      secret_key   => $pipelines::agent::secret_key,
       environments => $pipelines::agent::environments,
     }
     file { $agent_conf_file:
@@ -52,16 +51,16 @@ class pipelines::agent::unix {
       $install_cmd = "distelli agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml"
       $status_cmd = "distelli agent -data-dir \"${pipelines::agent::data_dir}\" status"
     } else {
-      $install_cmd = "distelli agent install -readyml"
-      $status_cmd = "distelli agent status"
+      $install_cmd = 'distelli agent install -readyml'
+      $status_cmd = 'distelli agent status'
     }
     exec { 'pipelines::agent install':
-      command     => $install_cmd,
-      subscribe   => [
+      command   => $install_cmd,
+      subscribe => [
         Exec['pipelines::agent download'],
       ],
-      onlyif      => "true && ! ${status_cmd}",
-      path        => "${install_dir}:${facts['path']}",
+      onlyif    => "true && ! ${status_cmd}",
+      path      => "${install_dir}:${facts['path']}",
     }
   }
 }
