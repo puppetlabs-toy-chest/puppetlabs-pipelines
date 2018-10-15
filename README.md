@@ -17,88 +17,57 @@ management servers.
 class { 'pipelines::agent':
   access_token => Sensitive('super_long_access_token'),
   secret_key   => Sensitive('super_secret_key'),
+  download_url => 'https://pfa.example.com/download/client',
+  start_agent  => true,
+  data_dir     => '/home/distelli/data',
+  install_dir  => '/home/distelli/bin',
+  environments => ['production', 'staging', 'development'],
+  version      => '3.68.0',
 }
 ```
 
-### Credentials
+### access_token and secret_key (required)
 
-In order to get up and running you must, at minimum, supply the Pipelines access
-token and secret key. You can generate them in the Pipelines interface under
-**Settings > Agent**.
+These are the only required parameters. You can obtain these credentials in the Pipelines
+interface under **Settings > Agent**.
 
 You will likely want to use [Hiera eyaml][] or some other form of encryption so
 that you don't have to put your credentials in your codebase in plain text.
 
-### Windows requirements
+### download_url (required for on-premise installs)
 
-On Windows, [7zip][] is required for the [archive module][] to extract the
-Distelli executable. You have two options:
+If you have an on-premise installation of pipelines, you are required to specify
+a download URL to install from so that the agent which is downloaded has the
+proper endpoints embedded within it.
 
-- Install [Chocolatey][] with Puppet by installing the [chocolatey module][],
-  then add `include chocolatey` to your manifest.
-- Install [7zip][] by some other means, then [set `seven_zip_provider` and
-  friends][archive class usage] on the `archive` class.
+### start_agent (optional)
 
-Additionally, you *must* specify the `user_password` on Windows.
+You can specify the `start_agent => false` parameter if you only want the
+`distelli` binary to be installed.
 
-### Install, configure, and run on Linux and macOS
+### data_dir (optional)
 
-```puppet
-class { 'pipelines::agent':
-  access_token => Sensitive('super_long_access_token'),
-  secret_key   => Sensitive('super_secret_key'),
-}
-```
+By default, the agent stores all data under the `/distelli` or
+`%SystemDrive%\Distelli.yml` directory on Windows. You can specify a different directory
+with the `data_dir` option. This option is useful if:
 
-### Install, configure, and run on Windows
+* You want to run multiple agents on the same host.
+* You want to restrict the permissions of the distelli user.
 
-```puppet
-include chocolatey
-class { 'pipelines::agent':
-  access_token  => Sensitive('super_long_access_token'),
-  secret_key    => Sensitive('super_secret_key'),
-  user_password => Sensitive('secret_user_password'),
-}
-```
+### install_dir (optional)
 
-### Specify environments
+By default the executable is installed in `/usr/local/bin` or `%ProgramFiles%\Distelli` on
+Windows. You can specify a different install directory with the `install_dir` option.
 
-```puppet
-class { 'pipelines::agent':
-  access_token => Sensitive('super_long_access_token'),
-  secret_key   => Sensitive('super_secret_key'),
-  environments => ['production', 'staging', 'development'],
-}
-```
+### environments (optional)
 
-### Specify endpoint
+This is a list of PfA environments to "join" when the agent starts.
 
-```puppet
-class { 'pipelines::agent':
-  access_token => Sensitive('super_long_access_token'),
-  secret_key   => Sensitive('super_secret_key'),
-  endpoint     => 'us-east-1c:ip-10-0-2-219.ec2.internal:7000',
-}
-```
+### version (not recommended)
 
-### Specify agent version
-
-```puppet
-class { 'pipelines::agent':
-  access_token => Sensitive('super_long_access_token'),
-  secret_key   => Sensitive('super_secret_key'),
-  version      => '3.66.33',
-}
-```
-
-### Specify home directory for the agent user
-
-```puppet
-class { 'pipelines::agent':
-  access_token => Sensitive('super_long_access_token'),
-  secret_key   => Sensitive('super_secret_key'),
-}
-```
+If you want to "pin" a particular verson of the agent you can use this option,
+although it is not recommended since not all pipeline products support multiple
+concurrent agent versions.
 
 ## Reference
 
@@ -127,10 +96,13 @@ guide.](https://docs.puppet.com/forge/contributing.html)
 To see who's already involved, see the [list of
 contributors.](https://github.com/puppetlabs/puppetlabs-pipelines/graphs/contributors)
 
+Special thanks to:
+
+* [Eric Williamson](https://github.com/ericwilliamson)
+* [Reid Vandewiele](https://github.com/reidmv)
+* [Ethan Brown](https://github.com/Iristyle)
+* [Michael Lombardi](https://github.com/michaeltlombardi)
+* [Bill Hurt](https://github.com/RandomNoun7)
+* [James Pogran](https://github.com/jpogran)
 
 [Hiera eyaml]: https://github.com/voxpupuli/hiera-eyaml
-[archive module]: https://forge.puppet.com/puppet/archive
-[archive class usage]: https://forge.puppet.com/puppet/archive#usage
-[Chocolatey]: https://www.chocolatey.org
-[chocolatey module]: https://forge.puppet.com/chocolatey/chocolatey
-[7zip]: http://www.7-zip.org/
