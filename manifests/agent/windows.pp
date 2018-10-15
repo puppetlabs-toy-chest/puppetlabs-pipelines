@@ -50,13 +50,16 @@ class pipelines::agent::windows {
       content   => epp('pipelines/distelli.yml.epp', $distelli_yml_vars),
       show_diff => false,
     }
+    # Note that we need to use cmd.exe /c to work around an issue
+    # with puppet on windows which would print this error:
+    #   "Could not find command '%{exe}'"
+    # ...probably because distelli.exe is a symlink.
     if $pipelines::agent::data_dir {
-      $install_cmd = "& \"${install_dir}\\distelli.exe\" agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml"
+      $install_cmd = "cmd.exe /c \"${install_dir}\\distelli.exe\" agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml"
     } else {
-      $install_cmd = "& \"${install_dir}\\distelli.exe\" agent install -readyml"
+      $install_cmd = "cmd.exe /c \"${install_dir}\\distelli.exe\" agent install -readyml"
     }
     exec { 'pipelines::agent install':
-      provider    => powershell,
       command     => $install_cmd,
       subscribe   => [
         Exec['pipelines::agent download'],
