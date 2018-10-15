@@ -21,7 +21,7 @@ class pipelines::agent::unix {
   exec { "mkdir ${install_dir}":
     command => "mkdir -p",
     path    => $facts['path'],
-    onlyif  => "! [ -d ${install_dir} ]",
+    onlyif  => "true && ! [ -d ${install_dir} ]",
   }
   file { $download_location:
     source => $download_url,
@@ -49,17 +49,18 @@ class pipelines::agent::unix {
       show_diff => false,
     }
     if $pipelines::agent::data_dir {
-      $install_cmd = "distelli agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml\""
+      $install_cmd = "distelli agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml"
+      $status_cmd = "distelli agent -data-dir \"${pipelines::agent::data_dir}\" status"
     } else {
       $install_cmd = "distelli agent install -readyml"
+      $status_cmd = "distelli agent status"
     }
     exec { 'pipelines::agent install':
-      provider    => powershell,
       command     => $install_cmd,
       subscribe   => [
         Exec['pipelines::agent download'],
       ],
-      refreshonly => true,
+      onlyif      => "true && ! ${status_cmd}",
       path        => "${install_dir}:${facts['path']}",
     }
   }
