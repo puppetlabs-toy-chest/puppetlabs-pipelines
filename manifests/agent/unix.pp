@@ -20,7 +20,7 @@ class pipelines::agent::unix {
   exec { "mkdir ${install_dir}":
     command => 'mkdir -p',
     path    => $facts['path'],
-    onlyif  => "true && ! [ -d ${install_dir} ]",
+    creates => $install_dir,
   }
   file { $download_location:
     source  => $download_url,
@@ -28,8 +28,11 @@ class pipelines::agent::unix {
   }
   exec { 'pipelines::agent download':
     require     => File[$download_location],
-    creates     => "${install_dir}/distelli",
     path        => $facts['path'],
+    subscribe   => [
+      File[$download_location],
+    ],
+    refreshonly => true,
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
@@ -55,12 +58,12 @@ class pipelines::agent::unix {
       $status_cmd = 'distelli agent status'
     }
     exec { 'pipelines::agent install':
-      command   => $install_cmd,
-      subscribe => [
+      command     => $install_cmd,
+      subscribe   => [
         Exec['pipelines::agent download'],
       ],
-      onlyif    => "true && ! ${status_cmd}",
-      path      => "${install_dir}:${facts['path']}",
+      refreshonly => true,
+      path        => "${install_dir}:${facts['path']}",
     }
   }
 }

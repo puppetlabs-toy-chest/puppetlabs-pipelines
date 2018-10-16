@@ -16,13 +16,12 @@ class pipelines::agent::windows {
     $download_url = "${pipelines::agent::download_url}.ps1"
   }
   $download_location = "${install_dir}\\distelli-download.ps1"
-  $download_cmd = "cmd.exe /c \"powershell -NoProfile -ExecutionPolicy Bypass -Command - < \"${download_location}\"\""
   $agent_conf_file = "${env['SystemDrive']}\\distelli.yml"
 
   exec { "mkdir ${install_dir}":
     command => "cmd.exe /c \"md \"${install_dir}\"\"",
     path    => $facts['path'],
-    onlyif  => "cmd.exe /c \"if exist \"${install_dir}\" exit 1\"",
+    creates => $install_dir,
   }
   file { $download_location:
     source  => $download_url,
@@ -30,8 +29,10 @@ class pipelines::agent::windows {
   }
   exec { 'pipelines::agent download':
     provider    => powershell,
-    require     => File[$download_location],
-    creates     => "${install_dir}\\distelli.exe",
+    subscribe   => [
+      File[$download_location],
+    ],
+    refreshonly => true,
     path        => $facts['path'],
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
