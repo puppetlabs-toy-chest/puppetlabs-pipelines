@@ -1,25 +1,24 @@
-# Install the Puppet Pipelines agent on Windows
+# Install the Puppet Pipelines agent on Linux and macOS
 #
 # Do not use directly; use pipelines::agent.
-class pipelines::agent::windows {
-  $env = $facts['pipelines_env']
-
+class pipelines::agent::unix {
   if ! $pipelines::agent::install_dir {
-    $install_dir = "${env['ProgramFiles']}\\Distelli"
+    $install_dir = '/usr/local/bin'
   } else {
     $install_dir = $pipelines::agent::install_dir
   }
 
   if $pipelines::agent::version {
-    $download_url = "${pipelines::agent::download_url}/${pipelines::agent::version}.ps1"
+    $download_url = "${pipelines::agent::download_url}/${pipelines::agent::version}"
   } else {
-    $download_url = "${pipelines::agent::download_url}.ps1"
+    $download_url = $pipelines::agent::download_url
   }
-  $download_location = "${install_dir}\\distelli-download.ps1"
-  $agent_conf_file = "${env['SystemDrive']}\\distelli.yml"
+  $download_location = "${install_dir}/distelli-download"
+  $download_cmd = "cat \"${download_location}\" | sh"
+  $agent_conf_file = '/etc/distelli.yml'
 
   exec { "mkdir ${install_dir}":
-    command => "cmd.exe /c \"md \"${install_dir}\"\"",
+    command => 'mkdir -p',
     path    => $facts['path'],
     creates => $install_dir,
   }
@@ -28,16 +27,16 @@ class pipelines::agent::windows {
     require => Exec["mkdir ${install_dir}"],
   }
   exec { 'pipelines::agent download':
-    provider    => powershell,
+    require     => File[$download_location],
+    path        => $facts['path'],
     subscribe   => [
       File[$download_location],
     ],
     refreshonly => true,
-    path        => $facts['path'],
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
-    command     => "& \"${download_location}\"; Exit 0",
+    command     => $download_cmd,
   }
   if $pipelines::agent::start_agent {
     $distelli_yml_vars = {
@@ -51,14 +50,12 @@ class pipelines::agent::windows {
       content   => epp('pipelines/distelli.yml.epp', $distelli_yml_vars),
       show_diff => false,
     }
-    # Note that we need to use cmd.exe /c to work around an issue
-    # with puppet on windows which would print this error:
-    #   "Could not find command '%{exe}'"
-    # ...probably because distelli.exe is a symlink.
     if $pipelines::agent::data_dir {
-      $install_cmd = "cmd.exe /c \"${install_dir}\\distelli.exe\" agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml"
+      $install_cmd = "distelli agent -data-dir \"${pipelines::agent::data_dir}\" install -readyml"
+      $status_cmd = "distelli agent -data-dir \"${pipelines::agent::data_dir}\" status"
     } else {
-      $install_cmd = "cmd.exe /c \"${install_dir}\\distelli.exe\" agent install -readyml"
+      $install_cmd = 'distelli agent install -readyml'
+      $status_cmd = 'distelli agent status'
     }
     exec { 'pipelines::agent install':
       command     => $install_cmd,
@@ -66,7 +63,7 @@ class pipelines::agent::windows {
         Exec['pipelines::agent download'],
       ],
       refreshonly => true,
-      path        => "${install_dir};${facts['path']}",
+      path        => "${install_dir}:${facts['path']}",
     }
   }
 }
