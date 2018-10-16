@@ -4,8 +4,8 @@
   "author": "Puppet, Inc.",
   "summary": "Manages the Puppet Pipelines agent.",
   "license": "Apache-2.0",
-  "source": "https://github.com/puppetlabs/pipelines",
-  "project_page": "https://github.com/puppetlabs/pipelines",
+  "source": "https://github.com/puppetlabs/puppetlabs-pipelines",
+  "project_page": "https://github.com/puppetlabs/puppetlabs-pipelines",
   "issues_url": "https://tickets.puppetlabs.com/browse/MODULES",
   "dependencies": [
     {
