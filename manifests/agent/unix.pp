@@ -17,21 +17,16 @@ class pipelines::agent::unix {
   $download_cmd = "cat \"${download_location}\" | sh"
   $agent_conf_file = '/etc/distelli.yml'
 
-  exec { "mkdir ${install_dir}":
-    command => 'mkdir -p',
+  exec { "mkdir ${download_location}":
+    command => "mkdir -p ${download_location}",
     path    => $facts['path'],
-    creates => $install_dir,
+    creates => $download_location,
+    unless  => "test -d ${download_location}",
   }
-  file { $download_location:
-    source  => $download_url,
-    require => Exec["mkdir ${install_dir}"],
-  }
+
   exec { 'pipelines::agent download':
-    require     => File[$download_location],
+    require     => Exec["mkdir ${download_location}"],
     path        => $facts['path'],
-    subscribe   => [
-      File[$download_location],
-    ],
     refreshonly => true,
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
