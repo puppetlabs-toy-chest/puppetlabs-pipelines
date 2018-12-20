@@ -28,7 +28,7 @@ class pipelines::agent::unix {
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
-    command     => $download_location,
+    command     => '/bin/bash -c $download_location',
   }
 
   if $pipelines::agent::start_agent {
