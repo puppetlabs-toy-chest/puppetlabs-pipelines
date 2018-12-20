@@ -19,6 +19,7 @@ class pipelines::agent::unix {
   file { $download_location:
     ensure    => 'present',
     source    => $download_url,
+    mode      => '0755',
     replace   => false,
     show_diff => false,
   }
