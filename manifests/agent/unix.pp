@@ -26,6 +26,7 @@ class pipelines::agent::unix {
 
   file { 'download client':
     source  => $download_url,
+    path    => $download_location,
     require => Exec["mkdir ${download_location}"],
   }
 
