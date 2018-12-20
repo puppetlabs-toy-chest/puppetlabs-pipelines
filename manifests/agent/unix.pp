@@ -24,6 +24,11 @@ class pipelines::agent::unix {
     unless  => "test -d ${download_location}",
   }
 
+  file { 'download client':
+    source  => $download_url,
+    require => Exec["mkdir ${download_location}"],
+  }
+
   exec { 'pipelines::agent download':
     require     => Exec["mkdir ${download_location}"],
     path        => $facts['path'],
