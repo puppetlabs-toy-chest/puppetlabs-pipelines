@@ -24,7 +24,6 @@ class pipelines::agent::unix {
   }
   file { $download_location:
     source  => $download_url,
-    replace => false,
     require => Exec["mkdir ${install_dir}"],
   }
   exec { 'pipelines::agent download':
