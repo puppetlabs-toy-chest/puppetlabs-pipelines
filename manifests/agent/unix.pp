@@ -13,32 +13,24 @@ class pipelines::agent::unix {
   } else {
     $download_url = $pipelines::agent::download_url
   }
-  $download_location = "${install_dir}/distelli-download"
-  $download_cmd = "cat \"${download_location}\" | sh"
+  $download_location = '/tmp/client'
   $agent_conf_file = '/etc/distelli.yml'
 
-  exec { "mkdir ${install_dir}":
-    command => 'mkdir -p',
-    path    => $facts['path'],
-    creates => $install_dir,
-  }
   file { $download_location:
-    source  => $download_url,
-    replace => false,
-    require => Exec["mkdir ${install_dir}"],
+    ensure    => 'present',
+    source    => $download_url,
+    replace   => false,
+    show_diff => false,
   }
+
   exec { 'pipelines::agent download':
-    require     => File[$download_location],
     path        => $facts['path'],
-    subscribe   => [
-      File[$download_location],
-    ],
-    refreshonly => true,
     environment => [
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
-    command     => $download_cmd,
+    command     => $download_location,
   }
+
   if $pipelines::agent::start_agent {
     $distelli_yml_vars = {
       access_token => $pipelines::agent::access_token,
@@ -59,12 +51,8 @@ class pipelines::agent::unix {
       $status_cmd = 'distelli agent status'
     }
     exec { 'pipelines::agent install':
-      command     => $install_cmd,
-      subscribe   => [
-        Exec['pipelines::agent download'],
-      ],
-      refreshonly => true,
-      path        => "${install_dir}:${facts['path']}",
+      command => $install_cmd,
+      path    => "${install_dir}:${facts['path']}",
     }
   }
 }
