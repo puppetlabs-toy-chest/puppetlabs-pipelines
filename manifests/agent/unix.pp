@@ -30,6 +30,7 @@ class pipelines::agent::unix {
       "DISTELLI_INSTALL_DIR=${install_dir}",
     ],
     command     => "/bin/bash -c ${download_location}",
+    creates     => '/tmp/distelli-downloaded'
   }
 
   if $pipelines::agent::start_agent {
@@ -54,6 +55,7 @@ class pipelines::agent::unix {
     exec { 'pipelines::agent install':
       command => $install_cmd,
       path    => "${install_dir}:${facts['path']}",
+      creates => '/tmp/distelli-installed'
     }
   }
 }
