@@ -18,7 +18,7 @@ class pipelines::agent::unix {
   $agent_conf_file = '/etc/distelli.yml'
 
   exec { "mkdir ${install_dir}":
-    command => 'mkdir -p',
+    command => "mkdir -p ${install_dir}",
     path    => $facts['path'],
     creates => $install_dir,
   }
