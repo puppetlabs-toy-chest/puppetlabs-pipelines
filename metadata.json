@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-pipelines",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Puppet, Inc.",
   "summary": "Manages the Puppet Pipelines agent.",
   "license": "Apache-2.0",
